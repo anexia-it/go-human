@@ -13,6 +13,9 @@ branches:
 
 install:
   - go get golang.org/x/tools/cmd/cover
+  - go get github.com/hashicorp/go-multierror
+  - go get github.com/speijnik/go-errortree
+  - go get github.com/stretchr/testify
 
 script:
   - GO15VENDOREXPERIMENT=1 go test -v -coverprofile=coverage.txt -covermode=atomic
