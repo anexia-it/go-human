@@ -1,11 +1,12 @@
 package human
 
-// DefaultTagName defaults the tag name option
+// DefaultTagName defines the default tag name
 const DefaultTagName = "human"
 
-// DefaultListSymbols defaults the list symbols
+// DefaultListSymbol defines the default list symbol
 const DefaultListSymbol = "*"
 
+// DefaultIndent defines the default indentation
 const DefaultIndent = 2
 
 // Option defines the function type of Encoder options

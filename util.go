@@ -15,4 +15,3 @@ func IsNilOrEmpty(i interface{}, v reflect.Value) bool {
 	// Hard case: check if interface has "zero" value (ie. empty string, zero integer, etc.)
 	return reflect.DeepEqual(i, reflect.Zero(v.Type()).Interface())
 }
-
