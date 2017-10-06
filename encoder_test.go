@@ -1,7 +1,6 @@
 package human
 
 import (
-	"bytes"
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/require"
 	"testing"
