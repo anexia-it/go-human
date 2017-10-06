@@ -1,10 +1,10 @@
 package human
 
 import (
+	"bytes"
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/require"
 	"testing"
-	"bytes"
 )
 
 func TestNewEncoder(t *testing.T) {
@@ -45,25 +45,24 @@ func TestNewEncoder(t *testing.T) {
 }
 
 type SimpleChild struct {
-	Name string // no tag
-	Property1 uint64 `human:"-"` // Ignored
+	Name      string  // no tag
+	Property1 uint64  `human:"-"`          // Ignored
 	Property2 float64 `human:",omitempty"` // Omitted if empty
 }
 type SimpleTest struct {
-	Var1 string //no tag
-	Var2 int `human:"variable_2"`
+	Var1  string //no tag
+	Var2  int    `human:"variable_2"`
 	Child SimpleChild
-
 }
 
 type MapTest struct {
-	Val1 uint64
-	Map map[string]SimpleChild
+	Val1      uint64
+	Map       map[string]SimpleChild
 	structMap map[SimpleChild]uint8
 }
 
 type SliceTest struct {
-	intSlice []int
+	intSlice    []int
 	structSlice []SimpleChild
 }
 
@@ -77,8 +76,8 @@ func TestEncoder_Encode(t *testing.T) {
 		testStruct := SimpleTest{
 			Var1: "v1",
 			Var2: 2,
-			Child:SimpleChild{
-				Name: "theChild",
+			Child: SimpleChild{
+				Name:      "theChild",
 				Property1: 3, // should be ignored
 				Property2: 0, // empty, should be omitted
 			},
@@ -103,9 +102,9 @@ Child:
 		testStruct := SimpleTest{
 			Var1: "v1",
 			Var2: 2,
-			Child:SimpleChild{
-				Name: "theChild",
-				Property1: 3, // should be ignored
+			Child: SimpleChild{
+				Name:      "theChild",
+				Property1: 3,   // should be ignored
 				Property2: 4.5, // not empty, should be encoded
 			},
 		}
@@ -121,4 +120,3 @@ Child:
 
 	})
 }
-
