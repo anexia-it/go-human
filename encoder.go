@@ -7,6 +7,7 @@ import (
 	"github.com/speijnik/go-errortree"
 	"io"
 	"reflect"
+	"sort"
 	"strings"
 	"unicode"
 )
@@ -22,7 +23,7 @@ type Encoder struct {
 // Encode writes the human encoding of v to the stream.
 func (e *Encoder) Encode(v interface{}) error {
 	value := reflect.ValueOf(v)
-	if err := e.encodeStruct(value, 0); err != nil {
+	if err := e.encodeStruct(value, 0, false); err != nil {
 		e.stream.Reset()
 		return err
 	}
@@ -33,7 +34,7 @@ func (e *Encoder) Encode(v interface{}) error {
 	return err
 }
 
-func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint) (err error) {
+func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, isFirst bool) (err error) {
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
 		fieldDefinition := t.Field(i)
@@ -67,8 +68,14 @@ func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint) (err error) {
 		}
 
 		// Getting this far means we are handling a non-empty field
-		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+fieldName+":")
-		if fieldEncodeErr := e.encodeValue(fieldInterface, fieldValue, indentLevel); fieldEncodeErr != nil {
+		// if the struct is in a list adapt the first element's indent to the list symbol
+		if isFirst {
+			fmt.Fprint(e.stream, " "+fieldName+":")
+			isFirst = false
+		} else {
+			fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+fieldName+":")
+		}
+		if fieldEncodeErr := e.encodeValue(fieldInterface, fieldValue, indentLevel, false); fieldEncodeErr != nil {
 			err = errortree.Add(err, fieldName, fieldEncodeErr)
 		}
 	}
@@ -78,13 +85,13 @@ func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint) (err error) {
 
 func (e *Encoder) encodeSlice(v reflect.Value, indentLevel uint) error {
 
-	listSymbol := e.listSymbols[int(indentLevel)%len(e.listSymbols)]
+	listSymbol := e.listSymbols[int(indentLevel-1)%len(e.listSymbols)]
 
 	for i := 0; i < v.Len(); i++ {
 		valueV := v.Index(i)
 		valueI := valueV.Interface()
-		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+listSymbol+" ")
-		if err := e.encodeValue(valueI, valueV, indentLevel); err != nil {
+		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+listSymbol)
+		if err := e.encodeValue(valueI, valueV, indentLevel, true); err != nil {
 			return err
 		}
 	}
@@ -93,22 +100,34 @@ func (e *Encoder) encodeSlice(v reflect.Value, indentLevel uint) error {
 
 func (e *Encoder) encodeMap(v reflect.Value, indentLevel uint) error {
 
-	listSymbol := e.listSymbols[int(indentLevel)%len(e.listSymbols)]
+	listSymbol := e.listSymbols[int(indentLevel-1)%len(e.listSymbols)]
 
 	keys := v.MapKeys()
+
+	mapKeysStringMap := make(map[string]reflect.Value, len(keys))
+	mapKeyStringList := make([]string, len(keys))
 	for i := 0; i < len(keys); i++ {
 		keyV := keys[i]
 		keyI := keyV.Interface()
+		keyString := fmt.Sprint(keyI)
+		mapKeysStringMap[keyString] = keyV
+		mapKeyStringList[i] = keyString
+	}
+
+	sort.Strings(mapKeyStringList)
+
+	for _, keyString := range mapKeyStringList {
+		keyV := mapKeysStringMap[keyString]
 		valueV := v.MapIndex(keyV)
-		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+listSymbol+" "+fmt.Sprint(keyI)+": ")
-		if err := e.encodeValue(valueV.Interface(), valueV, indentLevel); err != nil {
+		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+listSymbol+" "+keyString+":")
+		if err := e.encodeValue(valueV.Interface(), valueV, indentLevel, true); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint) (err error) {
+func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint, inList bool) (err error) {
 	// Check if the passed interface implements encoding.TextMarshaler, in which case we use the marshaler
 	// for generating the value
 	if marshaler, ok := i.(encoding.TextMarshaler); ok {
@@ -133,8 +152,10 @@ func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint) 
 	switch v.Kind() {
 	case reflect.Struct:
 		// Handle struct
-		fmt.Fprintln(e.stream, "")
-		err = e.encodeStruct(v, indentLevel+1)
+		if !inList {
+			fmt.Fprintln(e.stream, "")
+		}
+		err = e.encodeStruct(v, indentLevel+1, inList)
 	case reflect.Slice, reflect.Array:
 		// Handle slice
 		fmt.Fprintln(e.stream, "")
