@@ -3,6 +3,7 @@ package human_test
 import (
 	"fmt"
 	"github.com/anexia-it/go-human"
+	"net"
 	"os"
 )
 
@@ -33,9 +34,18 @@ type MapSliceTest struct {
 	StructMapSlice []map[string]int
 }
 
-//type MapSliceTestRidiculous struct {
-//	StructMapSlice []map[MapTest]SliceTest
-//}
+type address struct {
+	Ip net.IP
+}
+
+type TagFailTest struct {
+	Test int `human:"&§/$"`
+}
+
+type AnonymousFieldTest struct {
+	int
+	Text string
+}
 
 func ExampleEncoder_Encode_SimpleOmitEmpty() {
 	enc, err := human.NewEncoder(os.Stdout)
@@ -201,4 +211,61 @@ func ExampleEncoder_Encode_StructMapSlice() {
 		return
 	}
 
+}
+
+func ExampleEncoder_Encode_TextMarshaler() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	// Output: ip: 127.0.0.1
+
+	addr := address{
+		Ip: net.ParseIP("127.0.0.1"),
+	}
+	if err := enc.Encode(addr); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
+}
+
+func ExampleEncoder_Encode_MapFieldError() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	testStruct := TagFailTest{
+		Test: 1,
+	}
+
+	// Output: ERROR: 1 error occurred:
+	//
+	// * Invalid tag: '&§/$'
+	//
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
+}
+
+func ExampleEncoder_Encode_AnonymousFiled() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	//anonymous int field is ignored
+	testStruct := AnonymousFieldTest{
+		Text: "test",
+	}
+	// Output: Text: test
+
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
 }

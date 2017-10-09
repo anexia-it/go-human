@@ -34,7 +34,7 @@ func (e *Encoder) Encode(v interface{}) error {
 	return err
 }
 
-func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, isFirst bool) (err error) {
+func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, inList bool) (err error) {
 	t := v.Type()
 	for i := 0; i < t.NumField(); i++ {
 		fieldDefinition := t.Field(i)
@@ -69,9 +69,9 @@ func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, isFirst bool) 
 
 		// Getting this far means we are handling a non-empty field
 		// if the struct is in a list adapt the first element's indent to the list symbol
-		if isFirst {
+		if inList {
 			fmt.Fprint(e.stream, " "+fieldName+":")
-			isFirst = false
+			inList = false
 		} else {
 			fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+fieldName+":")
 		}
