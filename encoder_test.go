@@ -42,3 +42,4 @@ func TestNewEncoder(t *testing.T) {
 	})
 
 }
+

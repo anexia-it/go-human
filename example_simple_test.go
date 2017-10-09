@@ -3,6 +3,7 @@ package human_test
 import (
 	"fmt"
 	"github.com/anexia-it/go-human"
+	"net"
 	"os"
 )
 
@@ -33,11 +34,20 @@ type MapSliceTest struct {
 	StructMapSlice []map[string]int
 }
 
-//type MapSliceTestRidiculous struct {
-//	StructMapSlice []map[MapTest]SliceTest
-//}
+type address struct {
+	Ip net.IP
+}
 
-func ExampleEncoder_Encode_SimpleOmitEmpty() {
+type TagFailTest struct {
+	Test int `human:"&§/$"`
+}
+
+type AnonymousFieldTest struct {
+	int
+	Text string
+}
+
+func ExampleEncoder_Encode_simpleOmitEmpty() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -63,7 +73,7 @@ func ExampleEncoder_Encode_SimpleOmitEmpty() {
 	}
 }
 
-func ExampleEncoder_Encode_Simple() {
+func ExampleEncoder_Encode_simple() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -90,7 +100,7 @@ func ExampleEncoder_Encode_Simple() {
 	}
 }
 
-func ExampleEncoder_Encode_SimpleMap() {
+func ExampleEncoder_Encode_simpleMap() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -133,7 +143,7 @@ func ExampleEncoder_Encode_SimpleMap() {
 	}
 }
 
-func ExampleEncoder_Encode_SimpleSlice() {
+func ExampleEncoder_Encode_simpleSlice() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -171,7 +181,7 @@ func ExampleEncoder_Encode_SimpleSlice() {
 	}
 }
 
-func ExampleEncoder_Encode_StructMapSlice() {
+func ExampleEncoder_Encode_structMapSlice() {
 	enc, err := human.NewEncoder(os.Stdout, human.OptionListSymbols("+", "-"))
 	if err != nil {
 		return
@@ -201,4 +211,61 @@ func ExampleEncoder_Encode_StructMapSlice() {
 		return
 	}
 
+}
+
+func ExampleEncoder_Encode_textMarshaler() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	// Output: Ip:[49 50 55 46 48 46 48 46 49]
+
+	addr := address{
+		Ip: net.ParseIP("127.0.0.1"),
+	}
+	if err := enc.Encode(addr); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
+}
+
+func ExampleEncoder_Encode_mapFieldError() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	testStruct := TagFailTest{
+		Test: 1,
+	}
+
+	// Output: ERROR: 1 error occurred:
+	//
+	// * Invalid tag: '&§/$'
+	//
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
+}
+
+func ExampleEncoder_Encode_anonymousFiled() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	//anonymous int field is ignored
+	testStruct := AnonymousFieldTest{
+		Text: "test",
+	}
+	// Output: Text: test
+
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
 }
