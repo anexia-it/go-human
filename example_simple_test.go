@@ -219,7 +219,7 @@ func ExampleEncoder_Encode_TextMarshaler() {
 		return
 	}
 
-	// Output: ip: 127.0.0.1
+	// Output: Ip:[49 50 55 46 48 46 48 46 49]
 
 	addr := address{
 		Ip: net.ParseIP("127.0.0.1"),
