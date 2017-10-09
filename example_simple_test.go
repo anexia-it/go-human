@@ -47,7 +47,7 @@ type AnonymousFieldTest struct {
 	Text string
 }
 
-func ExampleEncoder_Encode_SimpleOmitEmpty() {
+func ExampleEncoder_Encode_simpleOmitEmpty() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -73,7 +73,7 @@ func ExampleEncoder_Encode_SimpleOmitEmpty() {
 	}
 }
 
-func ExampleEncoder_Encode_Simple() {
+func ExampleEncoder_Encode_simple() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -100,7 +100,7 @@ func ExampleEncoder_Encode_Simple() {
 	}
 }
 
-func ExampleEncoder_Encode_SimpleMap() {
+func ExampleEncoder_Encode_simpleMap() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -143,7 +143,7 @@ func ExampleEncoder_Encode_SimpleMap() {
 	}
 }
 
-func ExampleEncoder_Encode_SimpleSlice() {
+func ExampleEncoder_Encode_simpleSlice() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -181,7 +181,7 @@ func ExampleEncoder_Encode_SimpleSlice() {
 	}
 }
 
-func ExampleEncoder_Encode_StructMapSlice() {
+func ExampleEncoder_Encode_structMapSlice() {
 	enc, err := human.NewEncoder(os.Stdout, human.OptionListSymbols("+", "-"))
 	if err != nil {
 		return
@@ -213,7 +213,7 @@ func ExampleEncoder_Encode_StructMapSlice() {
 
 }
 
-func ExampleEncoder_Encode_TextMarshaler() {
+func ExampleEncoder_Encode_textMarshaler() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -231,7 +231,7 @@ func ExampleEncoder_Encode_TextMarshaler() {
 
 }
 
-func ExampleEncoder_Encode_MapFieldError() {
+func ExampleEncoder_Encode_mapFieldError() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -252,7 +252,7 @@ func ExampleEncoder_Encode_MapFieldError() {
 
 }
 
-func ExampleEncoder_Encode_AnonymousFiled() {
+func ExampleEncoder_Encode_anonymousFiled() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
