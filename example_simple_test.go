@@ -7,46 +7,55 @@ import (
 	"os"
 )
 
+// SimpleChild test struct
 type SimpleChild struct {
 	Name      string  // no tag
 	Property1 uint64  `human:"-"`          // Ignored
 	Property2 float64 `human:",omitempty"` // Omitted if empty
 }
 
+// SimpleTest test struct
 type SimpleTest struct {
-	Var1  string //no tag
-	Var2  int    `human:"variable_2"`
-	Child SimpleChild
+	Var1  string      // no tag
+	Var2  int         `human:"variable_2"`
+	Child SimpleChild // embedded struct
 }
 
+// MapTest test struct
 type MapTest struct {
 	Val1      uint64
 	Map       map[string]SimpleChild
 	StructMap map[SimpleChild]uint8
 }
 
+// SliceTest test struct
 type SliceTest struct {
 	IntSlice    []int
 	StructSlice []SimpleChild
 }
 
+// MapSliceTest test struct with slice of maps
 type MapSliceTest struct {
 	StructMapSlice []map[string]int
 }
 
-type address struct {
-	Ip net.IP
+// TextMarshalerTest test struct
+type TextMarshalerTest struct {
+	Ip net.IP // implements encoding.TextMarshaler interface
 }
 
+// TagFailTest test struct
 type TagFailTest struct {
-	Test int `human:"&§/$"`
+	Test int `human:"&§/$"` // invalid tag name
 }
 
+// AnonymousFieldTest test struct
 type AnonymousFieldTest struct {
-	int
+	int  // ignored
 	Text string
 }
 
+// Encode test with simple test struct to test encode with ignored fields and omit if field is empty
 func ExampleEncoder_Encode_simpleOmitEmpty() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
@@ -73,6 +82,7 @@ func ExampleEncoder_Encode_simpleOmitEmpty() {
 	}
 }
 
+// Encode test with simple test struct to test encode with ignored fields
 func ExampleEncoder_Encode_simple() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
@@ -100,6 +110,9 @@ func ExampleEncoder_Encode_simple() {
 	}
 }
 
+// Encode test with two maps.
+// Map: map string -> struct
+// StructMap: map struct -> int
 func ExampleEncoder_Encode_simpleMap() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
@@ -143,6 +156,7 @@ func ExampleEncoder_Encode_simpleMap() {
 	}
 }
 
+// Encode test with slice of integers and slice of structs
 func ExampleEncoder_Encode_simpleSlice() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
@@ -181,6 +195,7 @@ func ExampleEncoder_Encode_simpleSlice() {
 	}
 }
 
+// Encode test with slice of maps and each map is of type map[string]int
 func ExampleEncoder_Encode_structMapSlice() {
 	enc, err := human.NewEncoder(os.Stdout, human.OptionListSymbols("+", "-"))
 	if err != nil {
@@ -213,6 +228,7 @@ func ExampleEncoder_Encode_structMapSlice() {
 
 }
 
+// Encode test with TextMarshaler implemented by field
 func ExampleEncoder_Encode_textMarshaler() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
@@ -221,7 +237,7 @@ func ExampleEncoder_Encode_textMarshaler() {
 
 	// Output: Ip:[49 50 55 46 48 46 48 46 49]
 
-	addr := address{
+	addr := TextMarshalerTest{
 		Ip: net.ParseIP("127.0.0.1"),
 	}
 	if err := enc.Encode(addr); err != nil {
@@ -231,7 +247,8 @@ func ExampleEncoder_Encode_textMarshaler() {
 
 }
 
-func ExampleEncoder_Encode_mapFieldError() {
+// Encode test with invalid tag name
+func ExampleEncoder_Encode_tagError() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
 		return
@@ -252,6 +269,7 @@ func ExampleEncoder_Encode_mapFieldError() {
 
 }
 
+// Encode test with anonymous field
 func ExampleEncoder_Encode_anonymousFiled() {
 	enc, err := human.NewEncoder(os.Stdout)
 	if err != nil {
