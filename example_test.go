@@ -71,15 +71,15 @@ func ExampleEncoder_Encode_simpleOmitEmpty() {
 		},
 	}
 
-	// Output: Var1: v1
-	// variable_2: 2
-	// Child:
-	//   Name: theChild
-
 	if err := enc.Encode(testStruct); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		return
 	}
+
+	// Output: Var1: v1
+	// variable_2: 2
+	// Child:
+	//   Name: theChild
 }
 
 // Encode test with simple test struct to test encode with ignored fields
@@ -98,16 +98,16 @@ func ExampleEncoder_Encode_simple() {
 		},
 	}
 
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
 	// Output: Var1: v1
 	// variable_2: 2
 	// Child:
 	//   Name: theChild
 	//   Property2: 4.5
-
-	if err := enc.Encode(testStruct); err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		return
-	}
 }
 
 // Encode test with two maps.
@@ -141,6 +141,11 @@ func ExampleEncoder_Encode_simpleMap() {
 		StructMap: structMap,
 	}
 
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
 	// Output: Val1: 0
 	// Map:
 	//   * One: Name: Person1
@@ -149,11 +154,6 @@ func ExampleEncoder_Encode_simpleMap() {
 	// StructMap:
 	//   * {Person1 0 4.5}: 1
 	//   * {Person2 0 0}: 2
-
-	if err := enc.Encode(testStruct); err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		return
-	}
 }
 
 // Encode test with slice of integers and slice of structs
@@ -212,6 +212,11 @@ func ExampleEncoder_Encode_structMapSlice() {
 		StructMapSlice: slice,
 	}
 
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
 	//Output: StructMapSlice:
 	//   +
 	//     - one: 1
@@ -221,10 +226,6 @@ func ExampleEncoder_Encode_structMapSlice() {
 	//     - one: 1
 	//     - tenthousandonehundredfourtytwo: 10142
 	//     - two: 2
-	if err := enc.Encode(testStruct); err != nil {
-		fmt.Printf("ERROR: %s\n", err.Error())
-		return
-	}
 
 }
 
@@ -235,8 +236,6 @@ func ExampleEncoder_Encode_textMarshaler() {
 		return
 	}
 
-	// Output: Ip:[49 50 55 46 48 46 48 46 49]
-
 	addr := TextMarshalerTest{
 		Ip: net.ParseIP("127.0.0.1"),
 	}
@@ -244,6 +243,8 @@ func ExampleEncoder_Encode_textMarshaler() {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		return
 	}
+
+	// Output: Ip:[49 50 55 46 48 46 48 46 49]
 
 }
 
@@ -258,15 +259,15 @@ func ExampleEncoder_Encode_tagError() {
 		Test: 1,
 	}
 
-	// Output: ERROR: 1 error occurred:
-	//
-	// * Invalid tag: '&§/$'
-	//
 	if err := enc.Encode(testStruct); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		return
 	}
 
+	// Output: ERROR: 1 error occurred:
+	//
+	// * Invalid tag: '&§/$'
+	//
 }
 
 // Encode test with anonymous field
@@ -280,10 +281,11 @@ func ExampleEncoder_Encode_anonymousFiled() {
 	testStruct := AnonymousFieldTest{
 		Text: "test",
 	}
-	// Output: Text: test
 
 	if err := enc.Encode(testStruct); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 		return
 	}
+
+	// Output: Text: test
 }
