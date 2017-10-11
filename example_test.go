@@ -315,3 +315,49 @@ func ExampleEncoder_Encode_unexportedField() {
 
 	// Output: Text: test
 }
+
+// Encode test iterating slice of structs
+func ExampleEncoder_Encode_iteratingSlice() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	child1 := SimpleChild{
+		Name:      "Person1",
+		Property2: 4.5,
+		Property1: 0, // should be ignored
+	}
+
+	child2 := SimpleChild{
+		Name:      "Person2",
+		Property2: 4.5,
+		Property1: 0, // should be ignored
+	}
+
+	//child3 := SimpleChild{
+	//	Name:      "Person3",
+	//	Property2: 4.5,
+	//	Property1: 0, // should be ignored
+	//}
+	//child4 := SimpleChild{
+	//	Name: "Person4",
+	//}
+	structSlice := []SimpleChild{child1, child2}
+	testStruct := SliceTest{
+		StructSlice: structSlice,
+	}
+
+	// Output: Name: Person1
+	// Property2: 4.5
+	// Name: Person2
+	// Property2: 4.5
+
+	for _, s := range testStruct.StructSlice {
+		if err := enc.Encode(s); err != nil {
+			fmt.Printf("ERROR; %s\n", err)
+			return
+		}
+	}
+
+}
