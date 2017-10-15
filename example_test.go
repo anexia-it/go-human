@@ -55,6 +55,12 @@ type AnonymousFieldTest struct {
 	Text string
 }
 
+// UnexportedFieldTest test struct
+type UnexportedFieldTest struct {
+	unexported int  // ignored
+	Text string
+}
+
 // Encode test with simple test struct to test encode with ignored fields and omit if field is empty
 func ExampleEncoder_Encode_simpleOmitEmpty() {
 	enc, err := human.NewEncoder(os.Stdout)
@@ -279,6 +285,26 @@ func ExampleEncoder_Encode_anonymousFiled() {
 
 	//anonymous int field is ignored
 	testStruct := AnonymousFieldTest{
+		Text: "test",
+	}
+
+	if err := enc.Encode(testStruct); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
+	// Output: Text: test
+}
+
+// Encode test with unexported field
+func ExampleEncoder_Encode_unexportedField() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	// unexported int field is ignored
+	testStruct := UnexportedFieldTest{
 		Text: "test",
 	}
 
