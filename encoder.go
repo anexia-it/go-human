@@ -28,9 +28,7 @@ func (e *Encoder) Encode(v interface{}) error {
 		return err
 	}
 	_, err := e.stream.Flush()
-	if err != nil {
-		e.stream.Reset()
-	}
+	e.stream.Reset()
 	return err
 }
 
