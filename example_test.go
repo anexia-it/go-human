@@ -334,15 +334,7 @@ func ExampleEncoder_Encode_iteratingSlice() {
 		Property2: 4.5,
 		Property1: 0, // should be ignored
 	}
-
-	//child3 := SimpleChild{
-	//	Name:      "Person3",
-	//	Property2: 4.5,
-	//	Property1: 0, // should be ignored
-	//}
-	//child4 := SimpleChild{
-	//	Name: "Person4",
-	//}
+	
 	structSlice := []SimpleChild{child1, child2}
 	testStruct := SliceTest{
 		StructSlice: structSlice,
