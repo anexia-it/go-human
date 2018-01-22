@@ -183,7 +183,7 @@ func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint, 
 		fmt.Fprintf(e.stream, " %s\n", text)
 		return
 	} else if stringer, ok := i.(fmt.Stringer); ok {
-		fmt.Fprintf(e.stream, " %s", stringer.String())
+		fmt.Fprintf(e.stream, " %s\n", stringer.String())
 		return
 	}
 
