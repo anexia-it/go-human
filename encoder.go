@@ -164,6 +164,14 @@ func (e *Encoder) encodeMap(v reflect.Value, indentLevel uint) error {
 }
 
 func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint, inList bool) (err error) {
+	// At this point it is safe to get rid of a possible pointer...
+	if v.Kind() == reflect.Ptr && !v.IsNil() {
+		v = v.Elem()
+	} else if v.Kind() == reflect.Ptr {
+		// No-op for nil-pointers
+		return
+	}
+
 	// Check if the passed interface implements encoding.TextMarshaler, in which case we use the marshaler
 	// for generating the value
 	if marshaler, ok := i.(encoding.TextMarshaler); ok {
@@ -172,15 +180,10 @@ func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint, 
 			err = marshalErr
 		}
 		// As MarshalText is expected to return a textual representation, print it to our stream
-		fmt.Fprintln(e.stream, text)
+		fmt.Fprintf(e.stream, " %s\n", text)
 		return
-	}
-
-	// At this point it is safe to get rid of a possible pointer...
-	if v.Kind() == reflect.Ptr && !v.IsNil() {
-		v = v.Elem()
-	} else if v.Kind() == reflect.Ptr {
-		// No-op for nil-pointers
+	} else if stringer, ok := i.(fmt.Stringer); ok {
+		fmt.Fprintf(e.stream, " %s", stringer.String())
 		return
 	}
 

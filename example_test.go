@@ -5,7 +5,7 @@ import (
 	"net"
 	"os"
 
-	"github.com/anexia-it/go-human"
+	human "github.com/anexia-it/go-human"
 )
 
 // SimpleChild test struct
@@ -43,6 +43,10 @@ type MapSliceTest struct {
 // TextMarshalerTest test struct
 type TextMarshalerTest struct {
 	Ip net.IP // implements encoding.TextMarshaler interface
+}
+
+type TextMarshalerPointerTest struct {
+	Ip *net.IP
 }
 
 // TagFailTest test struct
@@ -265,8 +269,26 @@ func ExampleEncoder_Encode_textMarshaler() {
 		return
 	}
 
-	// Output: Ip:[49 50 55 46 48 46 48 46 49]
+	// Output: Ip: 127.0.0.1
 
+}
+
+func ExampleEncoder_Encode_textMarshalerPointer() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	ip := net.ParseIP("127.0.0.1")
+	addr := TextMarshalerPointerTest{
+		Ip: &ip,
+	}
+	if err := enc.Encode(addr); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+		return
+	}
+
+	// Output: Ip: 127.0.0.1
 }
 
 // Encode test with invalid tag name
