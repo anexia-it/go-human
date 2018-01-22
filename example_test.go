@@ -2,9 +2,10 @@ package human_test
 
 import (
 	"fmt"
-	"github.com/anexia-it/go-human"
 	"net"
 	"os"
+
+	"github.com/anexia-it/go-human"
 )
 
 // SimpleChild test struct
@@ -57,8 +58,22 @@ type AnonymousFieldTest struct {
 
 // UnexportedFieldTest test struct
 type UnexportedFieldTest struct {
-	unexported int  // ignored
-	Text string
+	unexported int // ignored
+	Text       string
+}
+
+type AnonymousStructPtrInnerTest struct {
+	Inner string
+}
+
+type AnonymousStructTest struct {
+	AnonymousStructPtrInnerTest
+	Outer string
+}
+
+type AnonymousStructPtrTest struct {
+	*AnonymousStructPtrInnerTest
+	Outer string
 }
 
 // Encode test with simple test struct to test encode with ignored fields and omit if field is empty
@@ -334,7 +349,7 @@ func ExampleEncoder_Encode_iteratingSlice() {
 		Property2: 4.5,
 		Property1: 0, // should be ignored
 	}
-	
+
 	structSlice := []SimpleChild{child1, child2}
 	testStruct := SliceTest{
 		StructSlice: structSlice,
@@ -347,9 +362,48 @@ func ExampleEncoder_Encode_iteratingSlice() {
 
 	for _, s := range testStruct.StructSlice {
 		if err := enc.Encode(s); err != nil {
-			fmt.Printf("ERROR; %s\n", err)
+			fmt.Printf("ERROR: %s\n", err.Error())
 			return
 		}
 	}
+}
 
+func ExampleEncoder_Encode_AnonymousStructPointer() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	outer := &AnonymousStructPtrTest{
+		AnonymousStructPtrInnerTest: &AnonymousStructPtrInnerTest{
+			Inner: "inner",
+		},
+		Outer: "outer",
+	}
+
+	// Output: Inner: inner
+	// Outer: outer
+	if err = enc.Encode(outer); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+	}
+}
+
+func ExampleEncoder_Encode_AnonymousStruct() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	outer := &AnonymousStructTest{
+		AnonymousStructPtrInnerTest: AnonymousStructPtrInnerTest{
+			Inner: "inner",
+		},
+		Outer: "outer",
+	}
+
+	// Output: Inner: inner
+	// Outer: outer
+	if err = enc.Encode(outer); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+	}
 }

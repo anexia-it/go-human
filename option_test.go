@@ -1,8 +1,9 @@
 package human
 
 import (
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestOptionTagName(t *testing.T) {

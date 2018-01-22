@@ -3,13 +3,14 @@ package human
 import (
 	"encoding"
 	"fmt"
-	"github.com/hashicorp/go-multierror"
-	"github.com/speijnik/go-errortree"
 	"io"
 	"reflect"
 	"sort"
 	"strings"
 	"unicode"
+
+	"github.com/hashicorp/go-multierror"
+	"github.com/speijnik/go-errortree"
 )
 
 // Encoder writes human readable text to an output stream.
@@ -34,13 +35,50 @@ func (e *Encoder) Encode(v interface{}) error {
 
 func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, inList bool) (err error) {
 	t := v.Type()
+
+	if v.Kind() == reflect.Ptr && v.IsValid() && !v.IsNil() {
+		v = v.Elem()
+		t = v.Type()
+	}
+
+	if !v.IsValid() {
+		// no-op for nil/invalid values
+		return
+	}
+
 	for i := 0; i < t.NumField(); i++ {
 		fieldDefinition := t.Field(i)
-		if fieldDefinition.Anonymous {
-			// skip anonymous field
-			continue
-		}
 		fieldValue := v.Field(i)
+
+		if fieldDefinition.Anonymous {
+			// Anonymous field handling
+
+			if fieldValue.Kind() != reflect.Struct && fieldValue.Kind() != reflect.Ptr {
+				// skip anonymous field that is neither a struct, nor a pointer
+				continue
+			} else if fieldValue.Kind() == reflect.Ptr && (!fieldValue.IsValid() || fieldValue.IsNil()) {
+				// skip anonymous nil pointers
+				continue
+			} else if fieldValue.Kind() == reflect.Ptr || fieldValue.Kind() == reflect.Struct {
+				// We are handling a valid pointer or a struct
+
+				if fieldValue.Kind() == reflect.Ptr && fieldValue.Elem().Kind() != reflect.Struct {
+					// Not a struct pointer, skip anonymous field
+					continue
+				} else if fieldValue.Kind() == reflect.Ptr {
+					// Struct pointer, dereference pointer
+					fieldValue = fieldValue.Elem()
+				}
+
+				// Getting this far means we are handling a struct
+				if fieldErr := e.encodeStruct(fieldValue, indentLevel, inList); fieldErr != nil {
+					err = errortree.Add(err, fieldDefinition.Name, fieldErr)
+				}
+
+				// We continue in any way, to skip the handling below
+				continue
+			}
+		}
 
 		fieldName := fieldDefinition.Name
 

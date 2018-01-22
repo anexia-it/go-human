@@ -1,10 +1,11 @@
 package human_test
 
 import (
-	"github.com/anexia-it/go-human"
-	"github.com/stretchr/testify/require"
 	"reflect"
 	"testing"
+
+	"github.com/anexia-it/go-human"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsNilOrEmpty(t *testing.T) {

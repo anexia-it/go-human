@@ -1,9 +1,10 @@
 package human
 
 import (
+	"testing"
+
 	"github.com/hashicorp/go-multierror"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestNewEncoder(t *testing.T) {
@@ -40,5 +41,4 @@ func TestNewEncoder(t *testing.T) {
 		require.EqualError(t, multiErr.Errors[0], ErrListSymbolsEmpty.Error())
 		require.EqualError(t, multiErr.Errors[1], ErrInvalidTagName.Error())
 	})
-
 }
