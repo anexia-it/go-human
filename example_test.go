@@ -61,6 +61,15 @@ type UnexportedFieldTest struct {
 	Text string
 }
 
+type AnonymousStructPtrInnerTest struct {
+	Inner string
+}
+
+type AnonymousStructPtrTest struct {
+	*AnonymousStructPtrInnerTest
+	Outer string
+}
+
 // Encode test with simple test struct to test encode with ignored fields and omit if field is empty
 func ExampleEncoder_Encode_simpleOmitEmpty() {
 	enc, err := human.NewEncoder(os.Stdout)
@@ -334,7 +343,7 @@ func ExampleEncoder_Encode_iteratingSlice() {
 		Property2: 4.5,
 		Property1: 0, // should be ignored
 	}
-	
+
 	structSlice := []SimpleChild{child1, child2}
 	testStruct := SliceTest{
 		StructSlice: structSlice,
@@ -347,9 +356,28 @@ func ExampleEncoder_Encode_iteratingSlice() {
 
 	for _, s := range testStruct.StructSlice {
 		if err := enc.Encode(s); err != nil {
-			fmt.Printf("ERROR; %s\n", err)
+			fmt.Printf("ERROR: %s\n", err.Error())
 			return
 		}
 	}
+}
 
+func ExampleEncoder_Encode_AnonymousStructPointer() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	outer := &AnonymousStructPtrTest{
+		AnonymousStructPtrInnerTest: &AnonymousStructPtrInnerTest{
+			Inner: "inner",
+		},
+		Outer: "outer",
+	}
+
+	// Output: Outer: outer
+	// Inner: inner
+	if err = enc.Encode(outer); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+	}
 }
