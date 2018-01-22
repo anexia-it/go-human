@@ -2,9 +2,10 @@ package human_test
 
 import (
 	"fmt"
-	"github.com/anexia-it/go-human"
 	"net"
 	"os"
+
+	"github.com/anexia-it/go-human"
 )
 
 // SimpleChild test struct
@@ -57,12 +58,17 @@ type AnonymousFieldTest struct {
 
 // UnexportedFieldTest test struct
 type UnexportedFieldTest struct {
-	unexported int  // ignored
-	Text string
+	unexported int // ignored
+	Text       string
 }
 
 type AnonymousStructPtrInnerTest struct {
 	Inner string
+}
+
+type AnonymousStructTest struct {
+	AnonymousStructPtrInnerTest
+	Outer string
 }
 
 type AnonymousStructPtrTest struct {
@@ -375,8 +381,28 @@ func ExampleEncoder_Encode_AnonymousStructPointer() {
 		Outer: "outer",
 	}
 
-	// Output: Outer: outer
-	// Inner: inner
+	// Output: Inner: inner
+	// Outer: outer
+	if err = enc.Encode(outer); err != nil {
+		fmt.Printf("ERROR: %s\n", err.Error())
+	}
+}
+
+func ExampleEncoder_Encode_AnonymousStruct() {
+	enc, err := human.NewEncoder(os.Stdout)
+	if err != nil {
+		return
+	}
+
+	outer := &AnonymousStructTest{
+		AnonymousStructPtrInnerTest: AnonymousStructPtrInnerTest{
+			Inner: "inner",
+		},
+		Outer: "outer",
+	}
+
+	// Output: Inner: inner
+	// Outer: outer
 	if err = enc.Encode(outer); err != nil {
 		fmt.Printf("ERROR: %s\n", err.Error())
 	}
