@@ -379,6 +379,7 @@ func ExampleEncoder_Encode_iteratingSlice() {
 
 	// Output: Name: Person1
 	// Property2: 4.5
+	//
 	// Name: Person2
 	// Property2: 4.5
 

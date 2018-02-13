@@ -24,16 +24,17 @@ type Encoder struct {
 // Encode writes the human encoding of v to the stream.
 func (e *Encoder) Encode(v interface{}) error {
 	value := reflect.ValueOf(v)
-	if err := e.encodeStruct(value, 0, false); err != nil {
+	if err := e.encodeValue(v, value, -1, false); err != nil {
 		e.stream.Reset()
 		return err
 	}
+
 	_, err := e.stream.Flush()
 	e.stream.Reset()
 	return err
 }
 
-func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, inList bool) (err error) {
+func (e *Encoder) encodeStruct(v reflect.Value, indentLevel int, inList bool) (err error) {
 	t := v.Type()
 
 	if v.Kind() == reflect.Ptr && v.IsValid() && !v.IsNil() {
@@ -109,7 +110,7 @@ func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, inList bool) (
 			fmt.Fprint(e.stream, " "+fieldName+":")
 			inList = false
 		} else {
-			fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+fieldName+":")
+			fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent)*indentLevel)+fieldName+":")
 		}
 		if fieldEncodeErr := e.encodeValue(fieldInterface, fieldValue, indentLevel, false); fieldEncodeErr != nil {
 			err = errortree.Add(err, fieldName, fieldEncodeErr)
@@ -119,14 +120,14 @@ func (e *Encoder) encodeStruct(v reflect.Value, indentLevel uint, inList bool) (
 	return
 }
 
-func (e *Encoder) encodeSlice(v reflect.Value, indentLevel uint) error {
+func (e *Encoder) encodeSlice(v reflect.Value, indentLevel int) error {
 
 	listSymbol := e.listSymbols[int(indentLevel-1)%len(e.listSymbols)]
 
 	for i := 0; i < v.Len(); i++ {
 		valueV := v.Index(i)
 		valueI := valueV.Interface()
-		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+listSymbol)
+		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent)*indentLevel)+listSymbol)
 		if err := e.encodeValue(valueI, valueV, indentLevel, true); err != nil {
 			return err
 		}
@@ -134,7 +135,7 @@ func (e *Encoder) encodeSlice(v reflect.Value, indentLevel uint) error {
 	return nil
 }
 
-func (e *Encoder) encodeMap(v reflect.Value, indentLevel uint) error {
+func (e *Encoder) encodeMap(v reflect.Value, indentLevel int) error {
 
 	listSymbol := e.listSymbols[int(indentLevel-1)%len(e.listSymbols)]
 
@@ -155,7 +156,7 @@ func (e *Encoder) encodeMap(v reflect.Value, indentLevel uint) error {
 	for _, keyString := range mapKeyStringList {
 		keyV := mapKeysStringMap[keyString]
 		valueV := v.MapIndex(keyV)
-		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent*indentLevel))+listSymbol+" "+keyString+":")
+		fmt.Fprint(e.stream, strings.Repeat(" ", int(e.indent)*indentLevel)+listSymbol+" "+keyString+":")
 		if err := e.encodeValue(valueV.Interface(), valueV, indentLevel, true); err != nil {
 			return err
 		}
@@ -163,7 +164,7 @@ func (e *Encoder) encodeMap(v reflect.Value, indentLevel uint) error {
 	return nil
 }
 
-func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel uint, inList bool) (err error) {
+func (e *Encoder) encodeValue(i interface{}, v reflect.Value, indentLevel int, inList bool) (err error) {
 	// At this point it is safe to get rid of a possible pointer...
 	if v.Kind() == reflect.Ptr && !v.IsNil() {
 		v = v.Elem()
